@@ -11,8 +11,10 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
@@ -20,13 +22,71 @@ import yaml
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.db.connection import init_schema
+from src.db.connection import get_connection, init_schema
 from src.ingest.yfinance_loader import fetch_ohlcv, save_to_duckdb
 from src.utils.logging_config import get_logger, setup_logging
 
 logger = get_logger(__name__)
 
 SYMBOLS_YAML = PROJECT_ROOT / "config" / "symbols.yaml"
+RUNS_DIR = PROJECT_ROOT / "data" / "_runs"
+
+
+def compute_db_metrics(symbols_attempted: list[str]) -> dict:
+    """DuckDB 직접 조회로 정합성·신선도·커버리지 메트릭 산출.
+
+    Returns:
+        {integrity_violations, max_staleness_days, coverage_ratio, db_total_rows}
+    """
+    con = get_connection()
+    try:
+        violations = con.execute("""
+            SELECT COUNT(*) FROM daily_ohlcv
+            WHERE high < low
+               OR high < open
+               OR high < close
+               OR low > open
+               OR low > close
+               OR volume < 0
+               OR close <= 0
+        """).fetchone()[0]
+
+        staleness = con.execute("""
+            SELECT MAX(DATE_DIFF('day', max_date, CURRENT_DATE)) FROM (
+                SELECT symbol, MAX(date) AS max_date FROM daily_ohlcv GROUP BY symbol
+            )
+        """).fetchone()[0]
+
+        covered = con.execute("""
+            SELECT COUNT(DISTINCT symbol) FROM daily_ohlcv
+            WHERE symbol IN ({})
+        """.format(",".join(f"'{s}'" for s in symbols_attempted))).fetchone()[0]
+
+        total_rows = con.execute("SELECT COUNT(*) FROM daily_ohlcv").fetchone()[0]
+    finally:
+        con.close()
+
+    coverage = round(covered / len(symbols_attempted), 4) if symbols_attempted else 0.0
+    return {
+        "integrity_violations": int(violations),
+        "max_staleness_days": int(staleness) if staleness is not None else None,
+        "coverage_ratio": coverage,
+        "db_total_rows": int(total_rows),
+    }
+
+
+def write_run_summary(payload: dict) -> Path:
+    """수집 결과 메트릭을 data/_runs/YYYY-MM-DD.json에 저장.
+
+    Returns:
+        쓰여진 파일 경로.
+    """
+    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    path = RUNS_DIR / f"{today}.json"
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+    return path
 
 
 def load_symbols(category: str | None = None) -> list[str]:
@@ -102,9 +162,29 @@ def main() -> None:
         total_rows=total_rows,
         elapsed_sec=elapsed,
     )
+
+    db_metrics = compute_db_metrics(symbols)
+    summary = {
+        "run_started_at": datetime.fromtimestamp(started, tz=timezone.utc).isoformat(),
+        "period": args.period,
+        "symbols_attempted": len(symbols),
+        "success": success,
+        "failed": failed,
+        "rows_ingested": total_rows,
+        "elapsed_sec": elapsed,
+        **db_metrics,
+    }
+    summary_path = write_run_summary(summary)
+    logger.info("run_summary_written", path=str(summary_path), **db_metrics)
+
     print(
         f"\n수집 완료: 성공 {success}/{len(symbols)} | 행 {total_rows} | {elapsed}s",
     )
+    print(f"메트릭: integrity_violations={db_metrics['integrity_violations']} "
+          f"max_staleness_days={db_metrics['max_staleness_days']} "
+          f"coverage={db_metrics['coverage_ratio']} "
+          f"db_rows={db_metrics['db_total_rows']}")
+    print(f"요약 저장: {summary_path}")
     if failed:
         print(f"실패 종목: {failed}")
 

@@ -2,9 +2,12 @@ name: Daily Market Data Ingest
 
 on:
   schedule:
-    # KST 16:00 = UTC 07:00, 월~금
+    # KST 16:00 = UTC 07:00, 월~금 (미장 종가 후 — 미국 동부 03:00 EST)
     - cron: '0 7 * * 1-5'
-  workflow_dispatch:  # 수동 실행 가능
+  workflow_dispatch:  # 수동 트리거 허용
+
+permissions:
+  contents: write  # _runs/ JSON 자동 commit·push 권한
 
 jobs:
   ingest:
@@ -20,25 +23,43 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install dependencies
+      - name: Install M1 minimal dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install \
+            "yfinance>=0.2.40" \
+            "duckdb>=1.0.0" \
+            "pandas>=2.2.0" \
+            "structlog>=24.4.0" \
+            "pyyaml>=6.0.2" \
+            "pydantic-settings>=2.5.0" \
+            "python-dotenv>=1.0.1"
+
+      - name: Restore DuckDB cache (시계열 누적 보존)
+        uses: actions/cache@v4
+        with:
+          path: data/finance.duckdb
+          key: duckdb-data-${{ github.run_id }}
+          restore-keys: |
+            duckdb-data-
+
+      - name: Initialize DuckDB schema (멱등)
+        run: python scripts/init_db.py
 
       - name: Run daily ingest
-        env:
-          ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: python scripts/ingest_daily.py
+        run: python scripts/ingest_daily.py --period 1mo
 
-      - name: Upload artifacts
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ingest-results
-          path: data/processed/
-          retention-days: 7
+      - name: Commit run summary (잔디 자동화)
+        run: |
+          git config user.name "RL9-csv"
+          git config user.email "shootingstar23@naver.com"
+          git add data/_runs/
+          if git diff --cached --quiet; then
+            echo "No new run summary to commit."
+          else
+            git commit -m "chore(ingest): daily run summary $(date -u +%Y-%m-%d)"
+            git push
+          fi
 
       - name: Notify on failure
         if: failure()

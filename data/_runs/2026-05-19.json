@@ -1,0 +1,13 @@
+{
+  "run_started_at": "2026-05-19T03:35:05.164739+00:00",
+  "period": "5d",
+  "symbols_attempted": 1,
+  "success": 1,
+  "failed": [],
+  "rows_ingested": 5,
+  "elapsed_sec": 0.86,
+  "integrity_violations": 0,
+  "max_staleness_days": 1,
+  "coverage_ratio": 1.0,
+  "db_total_rows": 5
+}

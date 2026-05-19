@@ -96,6 +96,10 @@ def save_to_duckdb(symbol: str, df: pd.DataFrame) -> int:
     if "adj_close" not in df_to_save.columns:
         df_to_save["adj_close"] = df_to_save["close"]
 
+    # yfinance가 timezone-aware Timestamp를 반환 → DuckDB DATE 컬럼과 충돌하므로
+    # ISO 문자열(YYYY-MM-DD)로 정규화. tz-aware든 naive든 일관된 결과 보장.
+    df_to_save["date"] = pd.to_datetime(df_to_save["date"]).dt.strftime("%Y-%m-%d")
+
     cols = ["symbol", "date", "open", "high", "low", "close", "adj_close", "volume"]
     df_to_save = df_to_save[cols]
 
@@ -103,16 +107,10 @@ def save_to_duckdb(symbol: str, df: pd.DataFrame) -> int:
     try:
         con.register("_tmp_ohlcv", df_to_save)
         con.execute("""
-            INSERT INTO daily_ohlcv (symbol, date, open, high, low, close, adj_close, volume)
+            INSERT OR REPLACE INTO daily_ohlcv
+                (symbol, date, open, high, low, close, adj_close, volume)
             SELECT symbol, date, open, high, low, close, adj_close, volume
             FROM _tmp_ohlcv
-            ON CONFLICT (symbol, date) DO UPDATE SET
-                open = EXCLUDED.open,
-                high = EXCLUDED.high,
-                low = EXCLUDED.low,
-                close = EXCLUDED.close,
-                adj_close = EXCLUDED.adj_close,
-                volume = EXCLUDED.volume
         """)
         logger.info("ohlcv_saved", symbol=symbol, rows=len(df_to_save))
     finally:
