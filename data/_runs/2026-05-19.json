@@ -1,13 +1,13 @@
 {
-  "run_started_at": "2026-05-19T03:35:05.164739+00:00",
-  "period": "5d",
-  "symbols_attempted": 1,
-  "success": 1,
+  "run_started_at": "2026-05-19T03:37:48.070808+00:00",
+  "period": "1mo",
+  "symbols_attempted": 12,
+  "success": 12,
   "failed": [],
-  "rows_ingested": 5,
-  "elapsed_sec": 0.86,
+  "rows_ingested": 252,
+  "elapsed_sec": 16.07,
   "integrity_violations": 0,
   "max_staleness_days": 1,
   "coverage_ratio": 1.0,
-  "db_total_rows": 5
+  "db_total_rows": 252
 }
