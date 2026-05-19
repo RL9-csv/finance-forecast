@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write  # _runs/ JSON 자동 commit·push 권한
 
+env:
+  # 2026-06-02부터 GitHub Actions가 Node.js 24 강제 전환 → 미리 opt-in
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   ingest:
     runs-on: ubuntu-latest
