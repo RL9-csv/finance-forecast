@@ -1,0 +1,97 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 가상환경
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# 환경 변수
+.env
+.env.local
+.env.*.local
+*.keys
+secrets.yaml
+config/secrets.yaml
+
+# 데이터 (대용량)
+data/raw/
+data/processed/
+data/features/
+*.parquet
+*.h5
+*.hdf5
+*.csv
+!data/sample/*.csv
+
+# DB
+*.duckdb
+*.db
+*.sqlite
+
+# 모델 아티팩트
+models_artifacts/*.pt
+models_artifacts/*.pth
+models_artifacts/*.onnx
+models_artifacts/*.pkl
+models_artifacts/*.joblib
+!models_artifacts/.gitkeep
+
+# 로그
+*.log
+logs/
+
+# 캐시
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# DVC
+/dvc/
+.dvc/cache
+
+# Docker
+*.tar
+
+# OS
+Thumbs.db
+desktop.ini
+
+# 임시 파일
+tmp/
+temp/
+*.tmp

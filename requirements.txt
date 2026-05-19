@@ -1,0 +1,98 @@
+# ===== 데이터 수집·처리 =====
+yfinance>=0.2.40
+ccxt>=4.4.0
+pykrx>=1.0.45
+fredapi>=0.5.2
+newsapi-python>=0.2.7
+pandas>=2.2.0
+polars>=1.0.0
+numpy>=1.26.0
+duckdb>=1.0.0
+
+# ===== DB =====
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.9
+alembic>=1.13.0
+
+# ===== 피처 엔지니어링 =====
+ta-lib>=0.4.32         # 별도 설치 필요 (시스템 라이브러리)
+pandas-ta>=0.3.14b0
+scikit-learn>=1.5.0
+umap-learn>=0.5.6
+hmmlearn>=0.3.2
+
+# ===== 모델링 (PyTorch) =====
+torch>=2.5.0
+transformers>=4.45.0
+darts>=0.32.0
+pytorch-forecasting>=1.0.0
+xgboost>=2.1.0
+lightgbm>=4.5.0
+
+# ===== TLM (Time-Series Foundation Model) =====
+# chronos-forecasting>=1.4.0
+# uni2ts>=1.2.0  # Moirai
+
+# ===== LLM =====
+openai>=1.50.0
+anthropic>=0.40.0
+groq>=0.11.0
+langchain>=0.3.0
+langchain-openai>=0.2.0
+langgraph>=0.2.0
+ollama>=0.4.0
+
+# ===== 임베딩·Vector DB =====
+sentence-transformers>=3.0.0
+chromadb>=0.5.0
+faiss-cpu>=1.8.0       # CPU 버전 (GPU 필요시 faiss-gpu)
+
+# ===== 백테스팅 =====
+vectorbt>=0.26.0
+backtrader>=1.9.78
+empyrical>=0.5.5
+quantstats>=0.0.62
+
+# ===== API·서빙 =====
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.9.0
+pydantic-settings>=2.5.0
+
+# ===== 대시보드 =====
+dash>=2.18.0
+dash-mantine-components>=0.14.0
+dash-ag-grid>=31.2.0
+plotly>=5.24.0
+gradio>=5.0.0
+
+# ===== 스케줄링·워크플로우 =====
+apscheduler>=3.10.0
+prefect>=3.0.0
+
+# ===== 모니터링·로깅 =====
+sentry-sdk[fastapi]>=2.14.0
+prometheus-client>=0.21.0
+structlog>=24.4.0
+evidently>=0.4.40
+
+# ===== 실험 관리 =====
+wandb>=0.18.0
+mlflow>=2.16.0
+
+# ===== 재시도·유틸 =====
+tenacity>=9.0.0
+python-dotenv>=1.0.1
+pyyaml>=6.0.2
+
+# ===== 데이터 검증 =====
+great-expectations>=1.0.0
+
+# ===== 개발 도구 =====
+pytest>=8.3.0
+pytest-cov>=5.0.0
+black>=24.8.0
+ruff>=0.6.0
+mypy>=1.11.0
+ipykernel>=6.29.0
+jupyter>=1.1.0
