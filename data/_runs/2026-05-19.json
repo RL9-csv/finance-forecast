@@ -1,11 +1,11 @@
 {
-  "run_started_at": "2026-05-19T03:37:48.070808+00:00",
+  "run_started_at": "2026-05-19T08:08:53.811630+00:00",
   "period": "1mo",
   "symbols_attempted": 12,
   "success": 12,
   "failed": [],
   "rows_ingested": 252,
-  "elapsed_sec": 16.07,
+  "elapsed_sec": 15.09,
   "integrity_violations": 0,
   "max_staleness_days": 1,
   "coverage_ratio": 1.0,
