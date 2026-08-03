@@ -1,0 +1,13 @@
+{
+  "run_started_at": "2026-08-03T10:31:21.638599+00:00",
+  "period": "1mo",
+  "symbols_attempted": 12,
+  "success": 12,
+  "failed": [],
+  "rows_ingested": 264,
+  "elapsed_sec": 15.49,
+  "integrity_violations": 0,
+  "max_staleness_days": 3,
+  "coverage_ratio": 1.0,
+  "db_total_rows": 864
+}
